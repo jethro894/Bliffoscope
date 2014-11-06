@@ -40,7 +40,7 @@ public class Comparer {
 		
 	}
 	
-	public List<CompareResult> generateResult(double[][] similarity, String sample_name, double threshold){
+	public static List<CompareResult> generateResult(double[][] similarity, String sample_name, double threshold){
 		List<CompareResult> results = new ArrayList<CompareResult>();
 		int y_length = similarity.length;
 		int x_length = similarity[0].length;
@@ -51,7 +51,6 @@ public class Comparer {
 					results.add(new CompareResult(sample_name, j, i, similarity[i][j]));
 			}
 		}
-		//this.printPossible(results, data, sample_row, sample_column);
 		return results;
 	}
 	
@@ -71,7 +70,10 @@ public class Comparer {
 		return (double)matched_pixels/(double)total_pixels;
 	}
 	
-	private void printPossible(List<CompareResult> results, char[][] data, int sample_row, int sample_column){
+	public static void printPossible(List<CompareResult> results, char[][] data, int sample_row, int sample_column){
+		System.out.println("==========================================");
+		if(!results.isEmpty())
+			System.out.println("Finding matches for sample: " + results.get(0).target_type);
 		for(CompareResult cr: results){
 			System.out.println("Pattern found in: (" + cr.x_offset + "," + cr.y_offset + ")");
 			System.out.println("Confident: " + cr.confidence);

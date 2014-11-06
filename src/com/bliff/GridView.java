@@ -7,12 +7,17 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 public class GridView {
 
@@ -20,18 +25,47 @@ public class GridView {
 	 * @param args
 	 * @throws IOException 
 	 */
+	private JTextField threshold;
+	private JButton update;
 
-
-	public GridView(final char[][] data, final char[][] sample, List<CompareResult> results) throws IOException{
-		JFrame frame = new JFrame("Testing");
+	public GridView(final char[][] data, final char[][] sample, double[][] similarity, String sampleName) throws IOException{
+		JFrame frame = new JFrame("Search result for " + sampleName);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
-        frame.add(new GridPanel(data, sample, results));
+        
+        final GridPanel grid_panel = new GridPanel(data, sample, similarity, sampleName);
+        
+        JPanel button_panel = new JPanel();
+        threshold = new JTextField(5);
+        update = new JButton("Update threshold");
+        update.addActionListener(new ActionListener(){
+        	public void actionPerformed(ActionEvent e)
+        	  {
+        		double thres = 0;
+        		try{
+        			thres = Double.parseDouble(threshold.getText());
+        		}catch(NumberFormatException e1){
+        			//do nothing
+        		}
+        		grid_panel.updateThreshold(thres);
+        	    
+        	  }
+        });
+        button_panel.add(threshold);
+        button_panel.add(update);
+        
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        
+        mainPanel.add(grid_panel);
+        mainPanel.add(button_panel);
+        frame.add(mainPanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 		
 	}
+	
 	
 	
 	public class GridPanel extends JPanel{
@@ -42,34 +76,52 @@ public class GridView {
 		private static final long serialVersionUID = 1L;
 		private int rows;
 		private int columns;
+		private char[][] data;
+		private char[][] sample;
+		private String sample_name;
+		private double[][] simi;
+		private List<CompareResult> results;
 		private List<Rectangle> cells;
 		private List<Point> selectedCells;
 		private List<Point> possibleTargets;
 		
-		public GridPanel(char[][] data, char[][] sample, List<CompareResult> results) {
+		public GridPanel(char[][] data, char[][] sample, double[][] similarity, String sampleName) {
 			super();
 			this.rows = data.length;
 			this.columns = data[0].length;
+			this.simi = similarity;
+			this.data = data;
+			this.sample = sample;
+			this.sample_name = sampleName;
 			this.cells = new ArrayList<Rectangle>();
 			this.selectedCells = new ArrayList<Point>();
 			this.possibleTargets = new ArrayList<Point>();
-			this.setPossibleTargets(results, sample);
-			this.draw(data);
+			this.draw();
+			//this.updateThreshold(0.65);
+			
 		}
 		
-		private void draw(char[][] data){
+		public void updateThreshold(double threshold){
+			if(threshold <= 0 || threshold > 1 )
+				return;
+			this.results = Comparer.generateResult(simi, this.sample_name, threshold);
+			this.possibleTargets.clear();
+			this.setPossibleTargets(this.results);
+			repaint();
+		}
+		
+		private void draw(){
 			for(int i = 0; i < rows; i++){
 				for(int j = 0; j < columns; j++){
-					if(data[i][j] == '+')
+					if(!Character.isWhitespace(this.data[i][j]))
 						this.selectedCells.add(new Point(j,i));
 				}
 			}
-			System.out.println(this.selectedCells.size());
 		}
 		
-		private void setPossibleTargets(List<CompareResult> results, char[][] sample){
-			int sample_row = sample.length;
-			int sample_column = sample[0].length;
+		private void setPossibleTargets(List<CompareResult> results){
+			int sample_row = this.sample.length;
+			int sample_column = this.sample[0].length;
 
 			for(CompareResult cr : results){
 				for(int i = 0; i < sample_row; i++){
@@ -79,8 +131,7 @@ public class GridView {
 					}
 				}
 			}
-			
-			System.out.println(this.possibleTargets.size());
+			Comparer.printPossible(this.results, this.data, sample_row, sample_column);
 		}
 		
 		@Override
