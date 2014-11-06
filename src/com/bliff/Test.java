@@ -11,6 +11,7 @@ public class Test {
 		String sample_path2 = "samples/Starship.blf";
 		String sample_name2 = "Starship";
 		
+		compare(data_path, sample_path1, sample_name1);
 		compare(data_path, sample_path2, sample_name2);
 	}
 	
