@@ -9,6 +9,18 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * This reader reads the data file and sample file into char[][] matrix
+ * WARNING: The data file and sample file MUST BE RECTANGLE (same length at every line)
+ * there is no functions to pad or cut patterns in the file
+ * 
+ * for the data file, it simply reads everything
+ * for the sample file, since I found out that the actual patterns are surrounded with whitespace
+ * 		so I cut the white space for higher precision
+ * if you have a new sample file with no surrounding whitespaces, you have two options:
+ * 		- surround it with whitespace, or
+ * 		- use readData() to read the sample file in the Test.java
+ */
 public class MapReader {
 
 	private List<String> readFile(String filepath) throws IOException{

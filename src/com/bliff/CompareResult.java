@@ -1,5 +1,8 @@
 package com.bliff;
-
+/*
+ * defines the compare result
+ * results are printed in terminal
+ */
 public class CompareResult {
 	String target_type;
 	int x_offset;
